@@ -1,0 +1,5 @@
+# Terminal 1 (PX4)
+PX4_GZ_WORLD=forest make px4_sitl gz_x500_oak_tfluna_d500
+
+# Terminal 2 (ROS viz bridge)
+ros2 launch px4_sensor_viz_bringup sitl_oak_lidar_viz.launch.py world:=forest

@@ -1,0 +1,14 @@
+# ROS 2 build artifacts
+build/
+install/
+log/
+.colcon/
+*.pyc
+__pycache__/
+
+# System
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
