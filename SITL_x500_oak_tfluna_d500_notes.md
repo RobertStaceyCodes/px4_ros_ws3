@@ -42,9 +42,9 @@ Adding the new `4022_gz_x500_oak_tfluna_d500` file enables:
 
 ## Important path issue encountered
 
-There are two PX4 checkouts on disk:
+PX4 checkouts on disk:
 - `/home/rob/px4_ros_ws/PX4-Autopilot` (where changes were made)
-- `/home/rob/PX4-Autopilot` (where one failed build was run)
+
 
 Error seen:
 - `ninja: error: unknown target 'gz_x500_oak_tfluna_d500'`
@@ -68,6 +68,39 @@ In PX4 shell:
 
 In Gazebo:
 - `gz topic -l | rg "depth_camera|lidar|tf_luna"`
+
+## Running with WASD teleop
+
+Use four terminals:
+
+1) PX4 + Gazebo
+```bash
+cd /home/rob/px4_ros_ws_broken_20260211_221222/PX4-Autopilot
+PX4_GZ_WORLD=forest PX4_GZ_MODEL_POSE="0,0,3,0,0,0" make px4_sitl gz_x500_oak_tfluna_d500
+```
+
+2) Sensor bridge + RViz
+```bash
+cd /home/rob/px4_ros_ws_broken_20260211_221222
+source /opt/ros/humble/setup.bash
+source install/setup.bash
+ros2 launch px4_sensor_viz_bringup sitl_oak_lidar_viz.launch.py world:=forest
+```
+
+3) Start Micro XRCE-DDS Agent (required for `/fmu/in/*` ROS topics)
+```bash
+MicroXRCEAgent udp4 -p 8888
+```
+
+4) Keyboard teleop (WASD)
+```bash
+cd /home/rob/px4_ros_ws_broken_20260211_221222
+source /opt/ros/humble/setup.bash
+source install/setup.bash
+ros2 run px4_ros_com wasd_teleop.py
+```
+
+Note: run teleop with `ros2 run` (not `ros2 launch`) so the node keeps an interactive TTY for keypress input.
 
 ## Repository note
 

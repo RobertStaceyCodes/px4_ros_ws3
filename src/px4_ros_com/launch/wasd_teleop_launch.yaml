@@ -1,0 +1,7 @@
+launch:
+
+- node:
+    pkg: "px4_ros_com"
+    exec: "wasd_teleop.py"
+    name: "wasd_teleop"
+    output: "screen"

@@ -1,0 +1,32 @@
+# Terminal 1 (PX4 SITL + Gazebo)
+cd ~/px4_ros_ws_broken_20260211_221222/PX4-Autopilot
+PX4_GZ_WORLD=forest PX4_GZ_MODEL_POSE="0,0,3,0,0,0" make px4_sitl gz_x500_oak_tfluna_d500
+
+
+
+
+gz sim -g
+
+
+
+# Terminal 2 (ROS viz bridge + RViz)
+cd ~/px4_ros_ws_broken_20260211_221222
+source /opt/ros/humble/setup.bash
+source install/setup.bash
+ros2 launch px4_sensor_viz_bringup sitl_oak_lidar_viz.launch.py world:=forest
+
+# Terminal 3 (PX4 <-> ROS bridge agent, required for WASD)
+MicroXRCEAgent udp4 -p 8888
+
+# Terminal 4 (WASD teleop node)
+cd ~/px4_ros_ws_broken_20260211_221222
+source /opt/ros/humble/setup.bash
+source install/setup.bash
+ros2 run px4_ros_com wasd_teleop.py
+
+
+
+
+
+
+rm -rf build/px4_ros_com install/px4_ros_com && source /opt/ros/humble/setup.bash && colcon build --packages-select px4_ros_com
