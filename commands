@@ -1,6 +1,6 @@
 # Terminal 1 (PX4 SITL + Gazebo)
 cd ~/px4_ros_ws_broken_20260211_221222/PX4-Autopilot
-PX4_GZ_WORLD=forest PX4_GZ_MODEL_POSE="0,0,3,0,0,0" make px4_sitl gz_x500_oak_tfluna_d500
+HEADLESS=1 PX4_GZ_WORLD=forest PX4_GZ_MODEL_POSE="0,0,3,0,0,0" make px4_sitl gz_x500_oak_tfluna_d500
 
 
 
@@ -14,6 +14,22 @@ cd ~/px4_ros_ws_broken_20260211_221222
 source /opt/ros/humble/setup.bash
 source install/setup.bash
 ros2 launch px4_sensor_viz_bringup sitl_oak_lidar_viz.launch.py world:=forest
+
+
+
+#OR
+
+
+cd ~/px4_ros_ws_broken_20260211_221222
+# 1. Source the bridge you just spent 35 minutes building
+source ~/bridge_ws/install/setup.bash
+
+# 2. Source your PX4 workspace again (this overlays it on the bridge)
+source ~/px4_ros_ws_broken_20260211_221222/install/setup.bash
+
+# 3. Try the launch again
+ros2 launch px4_sensor_viz_bringup sitl_oak_lidar_viz.launch.py world:=forest
+
 
 # Terminal 3 (PX4 <-> ROS bridge agent, required for WASD)
 MicroXRCEAgent udp4 -p 8888
