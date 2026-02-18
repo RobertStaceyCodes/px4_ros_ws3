@@ -7,6 +7,8 @@ Goal: create a single Gazebo SITL model for PX4 that combines:
 - two 1D range sensors (TF-Luna stand-ins: up and down)
 - one 2D lidar (Waveshare D500 stand-in)
 
+Will be eventually used with a Pixhawk 6C pro, Nvidia Jetson Orin Nano.
+
 The 2D lidar is represented by the existing `lidar_2d_v2` Gazebo model.
 The two TF-Luna sensors are represented by custom 1-sample `gpu_lidar` sensors.
 
@@ -101,6 +103,72 @@ ros2 run px4_ros_com wasd_teleop.py
 ```
 
 Note: run teleop with `ros2 run` (not `ros2 launch`) so the node keeps an interactive TTY for keypress input.
+
+## Running autonomous maze navigation
+
+Use four terminals:
+
+1) PX4 + Gazebo (maze world)
+```bash
+cd /home/rob/px4_ros_ws_broken_20260211_221222/PX4-Autopilot
+PX4_GZ_WORLD=maze PX4_GZ_MODEL_POSE="0,0,3,0,0,0" make px4_sitl gz_x500_oak_tfluna_d500 HEADLESS=1
+```
+
+mavlink start -u 14550 -t 100.110.83.51 -f
+
+
+2) Sensor bridge + RViz
+```bash
+cd /home/rob/px4_ros_ws_broken_20260211_221222
+source /opt/ros/humble/setup.bash
+source install/setup.bash
+ros2 launch px4_sensor_viz_bringup sitl_oak_lidar_viz.launch.py world:=maze
+```
+
+cd ~/px4_ros_ws_broken_20260211_221222
+# 1. Source the bridge you just spent 35 minutes building
+source ~/bridge_ws/install/setup.bash
+
+# 2. Source your PX4 workspace again (this overlays it on the bridge)
+source ~/px4_ros_ws_broken_20260211_221222/install/setup.bash
+ros2 launch px4_sensor_viz_bringup sitl_oak_lidar_viz.launch.py world:=maze
+
+
+3) Micro XRCE-DDS Agent
+```bash
+MicroXRCEAgent udp4 -p 8888
+```
+
+4) Maze Navigator (autonomous)
+```bash
+cd /home/rob/px4_ros_ws_broken_20260211_221222
+source /opt/ros/humble/setup.bash
+source install/setup.bash
+ros2 run px4_ros_com maze_navigator.py
+```
+
+or
+
+cd /home/rob/px4_ros_ws_broken_20260211_221222
+source /opt/ros/humble/setup.bash
+# First, bring in the bridge you built
+source ~/bridge_ws/install/setup.bash
+# Then, bring in your PX4 workspace
+source install/setup.bash
+
+ros2 run px4_ros_com maze_navigator.py
+
+The navigator will automatically arm, take off to 2.5 m AGL, solve the maze
+from the green start marker (0,0) to the red goal marker (24,0), and land.
+
+Algorithm overview (MSFMN — Multi-Sensor Fusion Maze Navigator):
+- Log-odds occupancy grid built in real-time from 360° LiDAR + depth camera
+- A* global path planner with inflated obstacles and breadcrumb penalty
+- VFH+ (Vector Field Histogram Plus) reactive local avoidance with
+  multi-sensor fusion filling the LiDAR blind spot from the grid
+- Adaptive speed control (slows in corridors, speeds up in open space)
+- Vertical envelope from dual TF-Luna (altitude hold + ceiling avoidance)
+- Stuck detection → recovery: hover → 360° scan → backup → replan
 
 ## Repository note
 

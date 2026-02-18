@@ -123,6 +123,7 @@ ament_python_install_package(${PROJECT_NAME})
 install(PROGRAMS
   src/examples/offboard_py/offboard_control.py
   src/examples/offboard_py/wasd_teleop.py
+  src/examples/offboard_py/maze_navigator.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
