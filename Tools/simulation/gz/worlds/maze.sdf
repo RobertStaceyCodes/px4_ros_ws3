@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sdf version="1.9">
+  <world name="maze">
+    <physics type="ode">
+      <max_step_size>0.01</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+      <real_time_update_rate>100</real_time_update_rate>
+    </physics>
+    <gravity>0 0 -9.8</gravity>
+    <magnetic_field>6e-06 2.3e-05 -4.2e-05</magnetic_field>
+    <atmosphere type="adiabatic"/>
+
+    <scene>
+      <grid>false</grid>
+      <ambient>0.45 0.45 0.45 1</ambient>
+      <background>0.7 0.7 0.7 1</background>
+      <shadows>false</shadows>
+    </scene>
+
+    <light name="sun" type="directional">
+      <pose>0 0 300 0 0 0</pose>
+      <cast_shadows>true</cast_shadows>
+      <intensity>1.0</intensity>
+      <direction>0.2 0.5 -0.84</direction>
+      <diffuse>0.9 0.9 0.9 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <attenuation>
+        <range>2000</range>
+        <constant>1</constant>
+        <linear>0</linear>
+        <quadratic>0</quadratic>
+      </attenuation>
+    </light>
+
+    <spherical_coordinates>
+      <surface_model>EARTH_WGS84</surface_model>
+      <world_frame_orientation>ENU</world_frame_orientation>
+      <latitude_deg>47.397971057728974</latitude_deg>
+      <longitude_deg>8.546163739800146</longitude_deg>
+      <elevation>0</elevation>
+    </spherical_coordinates>
+
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>120 120</size>
+            </plane>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>120 120</size>
+            </plane>
+          </geometry>
+          <material>
+            <ambient>0.78 0.78 0.78 1</ambient>
+            <diffuse>0.78 0.78 0.78 1</diffuse>
+            <specular>0.2 0.2 0.2 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Start marker -->
+    <model name="start_marker">
+      <static>true</static>
+      <pose>0 0 0.02 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.8</radius>
+              <length>0.04</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.1 0.8 0.1 1</ambient>
+            <diffuse>0.1 0.8 0.1 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Goal marker -->
+    <model name="goal_marker">
+      <static>true</static>
+      <pose>24 0 0.02 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.8</radius>
+              <length>0.04</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.9 0.2 0.2 1</ambient>
+            <diffuse>0.9 0.2 0.2 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Maze walls (all static boxes, 6 m high) -->
+    <!-- Outer boundary -->
+    <model name="wall_outer_n">
+      <static>true</static>
+      <pose>12 14 3 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>30 1 6</size></box></geometry></collision><visual name="v"><geometry><box><size>30 1 6</size></box></geometry></visual></link>
+    </model>
+    <model name="wall_outer_s">
+      <static>true</static>
+      <pose>12 -14 3 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>30 1 6</size></box></geometry></collision><visual name="v"><geometry><box><size>30 1 6</size></box></geometry></visual></link>
+    </model>
+    <model name="wall_outer_w">
+      <static>true</static>
+      <pose>-2 0 3 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>1 29 6</size></box></geometry></collision><visual name="v"><geometry><box><size>1 29 6</size></box></geometry></visual></link>
+    </model>
+    <model name="wall_outer_e">
+      <static>true</static>
+      <pose>26 0 3 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>1 29 6</size></box></geometry></collision><visual name="v"><geometry><box><size>1 29 6</size></box></geometry></visual></link>
+    </model>
+
+    <!-- Long corridor walls -->
+    <model name="wall_a">
+      <static>true</static>
+      <pose>4 8 3 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>10 1 6</size></box></geometry></collision><visual name="v"><geometry><box><size>10 1 6</size></box></geometry></visual></link>
+    </model>
+    <model name="wall_b">
+      <static>true</static>
+      <pose>10 3 3 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>1 10 6</size></box></geometry></collision><visual name="v"><geometry><box><size>1 10 6</size></box></geometry></visual></link>
+    </model>
+    <model name="wall_c">
+      <static>true</static>
+      <pose>8 -6 3 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>14 1 6</size></box></geometry></collision><visual name="v"><geometry><box><size>14 1 6</size></box></geometry></visual></link>
+    </model>
+    <model name="wall_d">
+      <static>true</static>
+      <pose>16 5 3 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>1 16 6</size></box></geometry></collision><visual name="v"><geometry><box><size>1 16 6</size></box></geometry></visual></link>
+    </model>
+    <model name="wall_e">
+      <static>true</static>
+      <pose>20 -4 3 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>10 1 6</size></box></geometry></collision><visual name="v"><geometry><box><size>10 1 6</size></box></geometry></visual></link>
+    </model>
+
+    <!-- Chicanes and dead-ends -->
+    <model name="wall_f">
+      <static>true</static>
+      <pose>2 -2 3 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>1 6 6</size></box></geometry></collision><visual name="v"><geometry><box><size>1 6 6</size></box></geometry></visual></link>
+    </model>
+    <model name="wall_g">
+      <static>true</static>
+      <pose>6 1 3 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>4 1 6</size></box></geometry></collision><visual name="v"><geometry><box><size>4 1 6</size></box></geometry></visual></link>
+    </model>
+    <model name="wall_h">
+      <static>true</static>
+      <pose>13 10 3 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>6 1 6</size></box></geometry></collision><visual name="v"><geometry><box><size>6 1 6</size></box></geometry></visual></link>
+    </model>
+    <model name="wall_i">
+      <static>true</static>
+      <pose>21 9 3 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>1 8 6</size></box></geometry></collision><visual name="v"><geometry><box><size>1 8 6</size></box></geometry></visual></link>
+    </model>
+    <model name="wall_j">
+      <static>true</static>
+      <pose>22 -10 3 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>6 1 6</size></box></geometry></collision><visual name="v"><geometry><box><size>6 1 6</size></box></geometry></visual></link>
+    </model>
+    <model name="wall_k">
+      <static>true</static>
+      <pose>14 -10 3 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>1 6 6</size></box></geometry></collision><visual name="v"><geometry><box><size>1 6 6</size></box></geometry></visual></link>
+    </model>
+    <model name="wall_l">
+      <static>true</static>
+      <pose>4 12 3 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>1 4 6</size></box></geometry></collision><visual name="v"><geometry><box><size>1 4 6</size></box></geometry></visual></link>
+    </model>
+    <model name="wall_m">
+      <static>true</static>
+      <pose>18 0 3 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>2 8 6</size></box></geometry></collision><visual name="v"><geometry><box><size>2 8 6</size></box></geometry></visual></link>
+    </model>
+    <model name="wall_n">
+      <static>true</static>
+      <pose>7 -11 3 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>6 1 6</size></box></geometry></collision><visual name="v"><geometry><box><size>6 1 6</size></box></geometry></visual></link>
+    </model>
+    <model name="wall_o">
+      <static>true</static>
+      <pose>24 4 3 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>1 6 6</size></box></geometry></collision><visual name="v"><geometry><box><size>1 6 6</size></box></geometry></visual></link>
+    </model>
+
+  </world>
+</sdf>
