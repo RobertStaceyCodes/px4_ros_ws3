@@ -1,0 +1,24 @@
+{
+  "name": "Aether Core Dev",
+  "build": { "dockerfile": "Dockerfile" },
+  "privileged": true,
+  "runArgs": [
+    "--network=host",
+    "--pid=host",
+    "--ipc=host",
+    "--env=DISPLAY=${env:DISPLAY}"
+  ],
+  "workspaceMount": "source=${localWorkspaceFolder},target=/root/workspace,type=bind",
+  "workspaceFolder": "/root/workspace",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.cpptools",
+        "ms-python.python",
+        "ms-iot.vscode-ros",
+        "eamodio.gitlens"
+      ]
+    }
+  },
+  "postCreateCommand": "echo 'source /opt/ros/humble/setup.bash' >> ~/.bashrc"
+}
