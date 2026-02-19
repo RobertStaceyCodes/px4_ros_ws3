@@ -116,12 +116,13 @@ execute_process(
 	COMMAND git describe --exclude ext/* --tags --match "v[0-9]*"
 	OUTPUT_VARIABLE PX4_GIT_TAG
 	OUTPUT_STRIP_TRAILING_WHITESPACE
+	ERROR_QUIET
 	RESULTS_VARIABLE GIT_DESCRIBE_RESULT
 	WORKING_DIRECTORY ${PX4_SOURCE_DIR}
 	)
 
-# if proper git tag unavilable default to v0.0.0
-if(NOT ${GIT_DESCRIBE_RESULT} MATCHES "0")
+# if proper git tag unavailable (e.g. repo has no tags, or not a normal clone) default to v0.0.0
+if(NOT GIT_DESCRIBE_RESULT EQUAL 0 OR NOT PX4_GIT_TAG MATCHES "^v[0-9]")
 	set(PX4_GIT_TAG "v0.0.0")
 endif()
 

@@ -45,10 +45,10 @@ else:
                                   stderr=subprocess.STDOUT).decode('utf-8').strip()
 
 try:
-    # get the tag if we're on a tagged commit
+    # get the tag if we're on a tagged commit (suppress stderr when repo has no tags)
     tag_or_branch = subprocess.check_output((git_describe_cmd+' --exact-match').split(),
-                                            stderr=subprocess.STDOUT).decode('utf-8').strip()
-except:
+                                            stderr=subprocess.DEVNULL).decode('utf-8').strip()
+except Exception:
     tag_or_branch = None
 
 if validate:

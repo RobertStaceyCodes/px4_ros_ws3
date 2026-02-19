@@ -1,3 +1,7 @@
+## Building on another computer (after clone/pull)
+
+Always use **PX4_SKIP_GIT_CHECK=1** when building PX4 from this repo. The repo has no git tags, so "No names found, cannot describe anything" is normal; the build is set to use v0.0.0 in that case.
+
 ## Subtree build (one-time after pulling / if you added the fixes)
 
 PX4 lives in-repo (git subtree). Build requires PX4_SKIP_GIT_CHECK=1. Commit the subtree fixes once:
