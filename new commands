@@ -27,12 +27,12 @@ colcon build --symlink-install
 
 #AFTER THAT, RUN this to make the tf_sanitizer script executable:
 
-chmod +x /home/rob/px4_ros_ws3/src/px4_sensor_viz_bringup/scripts/tf_sanitizer.py
+chmod +x ~/px4_ros_ws3/src/px4_sensor_viz_bringup/scripts/tf_sanitizer.py
 
 
 
 #final step to run the bridge:
-cd /home/rob/px4_ros_ws3
+cd ~/px4_ros_ws3
 source /opt/ros/humble/setup.bash
 source install/setup.bash
 ros2 launch px4_sensor_viz_bringup sitl_oak_lidar_viz.launch.py world:=maze
