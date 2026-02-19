@@ -1,0 +1,13 @@
+{
+  "name": "ui-renderer",
+  "version": "0.0.1",
+  "main": "puppeteer.js",
+  "author": "Jonas Eschmann",
+  "license": "MIT",
+  "description": "",
+  "dependencies": {
+    "busboy": "^1.6.0",
+    "puppeteer": "^24.9.0",
+    "yazl": "^3.3.1"
+  }
+}
