@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT="/home/rob/px4_ros_ws_broken_20260211_221222"
+ROOT="/home/rob/px4_ros_ws3"
 repos=(
   "$ROOT/PX4-Autopilot"
   "$ROOT/PX4-Autopilot/src/modules/mavlink/mavlink"

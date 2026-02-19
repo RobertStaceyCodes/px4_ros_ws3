@@ -77,13 +77,13 @@ Use four terminals:
 
 1) PX4 + Gazebo
 ```bash
-cd /home/rob/px4_ros_ws_broken_20260211_221222/PX4-Autopilot
+cd /home/rob/px4_ros_ws3/PX4-Autopilot
 PX4_GZ_WORLD=forest PX4_GZ_MODEL_POSE="0,0,3,0,0,0" make px4_sitl gz_x500_oak_tfluna_d500
 ```
 
 2) Sensor bridge + RViz
 ```bash
-cd /home/rob/px4_ros_ws_broken_20260211_221222
+cd /home/rob/px4_ros_ws3
 source /opt/ros/humble/setup.bash
 source install/setup.bash
 ros2 launch px4_sensor_viz_bringup sitl_oak_lidar_viz.launch.py world:=forest
@@ -96,7 +96,7 @@ MicroXRCEAgent udp4 -p 8888
 
 4) Keyboard teleop (WASD)
 ```bash
-cd /home/rob/px4_ros_ws_broken_20260211_221222
+cd /home/rob/px4_ros_ws3
 source /opt/ros/humble/setup.bash
 source install/setup.bash
 ros2 run px4_ros_com wasd_teleop.py
@@ -110,7 +110,7 @@ Use four terminals:
 
 1) PX4 + Gazebo (maze world)
 ```bash
-cd /home/rob/px4_ros_ws_broken_20260211_221222/PX4-Autopilot
+cd /home/rob/px4_ros_ws3/PX4-Autopilot
 PX4_GZ_WORLD=maze PX4_GZ_MODEL_POSE="0,0,3,0,0,0" make px4_sitl gz_x500_oak_tfluna_d500 HEADLESS=1
 ```
 
@@ -119,18 +119,18 @@ mavlink start -u 14550 -t 100.110.83.51 -f
 
 2) Sensor bridge + RViz
 ```bash
-cd /home/rob/px4_ros_ws_broken_20260211_221222
+cd /home/rob/px4_ros_ws3
 source /opt/ros/humble/setup.bash
 source install/setup.bash
 ros2 launch px4_sensor_viz_bringup sitl_oak_lidar_viz.launch.py world:=maze
 ```
 
-cd ~/px4_ros_ws_broken_20260211_221222
+cd ~/px4_ros_ws3
 # 1. Source the bridge you just spent 35 minutes building
 source ~/bridge_ws/install/setup.bash
 
 # 2. Source your PX4 workspace again (this overlays it on the bridge)
-source ~/px4_ros_ws_broken_20260211_221222/install/setup.bash
+source ~/px4_ros_ws3/install/setup.bash
 ros2 launch px4_sensor_viz_bringup sitl_oak_lidar_viz.launch.py world:=maze
 
 
@@ -141,7 +141,7 @@ MicroXRCEAgent udp4 -p 8888
 
 4) Maze Navigator (autonomous)
 ```bash
-cd /home/rob/px4_ros_ws_broken_20260211_221222
+cd /home/rob/px4_ros_ws3
 source /opt/ros/humble/setup.bash
 source install/setup.bash
 ros2 run px4_ros_com maze_navigator.py
@@ -149,7 +149,7 @@ ros2 run px4_ros_com maze_navigator.py
 
 or
 
-cd /home/rob/px4_ros_ws_broken_20260211_221222
+cd /home/rob/px4_ros_ws3
 source /opt/ros/humble/setup.bash
 # First, bring in the bridge you built
 source ~/bridge_ws/install/setup.bash

@@ -14,7 +14,7 @@ Quick usage
 1. Inspect the planned actions (dry-run):
 
 ```bash
-cd /home/rob/px4_ros_ws_broken_20260211_221222
+cd /home/rob/px4_ros_ws3
 ./create_master_repo.sh
 ```
 
