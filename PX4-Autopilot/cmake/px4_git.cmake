@@ -37,6 +37,14 @@ if(px4_git_included)
 endif(px4_git_included)
 set(px4_git_included true)
 
+# Subtree / in-repo build: no per-submodule .git; skip submodule init/update
+if(DEFINED ENV{PX4_SKIP_GIT_CHECK} OR DEFINED ENV{PX4_SUBTREE_BUILD})
+	set(PX4_SUBTREE_BUILD 1)
+endif()
+if(PX4_SUBTREE_BUILD)
+	set(ENV{GIT_SUBMODULES_ARE_EVIL} "1")
+endif()
+
 #=============================================================================
 #
 #	px4_add_git_submodule
@@ -78,14 +86,34 @@ function(px4_add_git_submodule)
 	string(REPLACE "/" "_" NAME ${PATH})
 	string(REPLACE "." "_" NAME ${NAME})
 
-	add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/git_init_${NAME}.stamp
-		COMMAND Tools/check_submodules.sh ${REL_PATH}
-		COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/git_init_${NAME}.stamp
-		DEPENDS ${PX4_SOURCE_DIR}/.gitmodules ${PATH}/.git
-		COMMENT "git submodule ${REL_PATH}"
-		WORKING_DIRECTORY ${PX4_SOURCE_DIR}
-		USES_TERMINAL
-		)
+	set(_git_stamp_depends ${PX4_SOURCE_DIR}/.gitmodules)
+	if(NOT PX4_SUBTREE_BUILD)
+		if(IS_ABSOLUTE ${PATH})
+			list(APPEND _git_stamp_depends ${PATH}/.git)
+		else()
+			list(APPEND _git_stamp_depends ${CMAKE_CURRENT_SOURCE_DIR}/${PATH}/.git)
+		endif()
+	endif()
+
+	if(PX4_SUBTREE_BUILD)
+		add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/git_init_${NAME}.stamp
+			COMMAND /bin/sh -c "GIT_SUBMODULES_ARE_EVIL=1 ${PX4_SOURCE_DIR}/Tools/check_submodules.sh ${REL_PATH}"
+			COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/git_init_${NAME}.stamp
+			DEPENDS ${_git_stamp_depends}
+			COMMENT "git submodule ${REL_PATH} (subtree build, skip init)"
+			WORKING_DIRECTORY ${PX4_SOURCE_DIR}
+			USES_TERMINAL
+			)
+	else()
+		add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/git_init_${NAME}.stamp
+			COMMAND Tools/check_submodules.sh ${REL_PATH}
+			COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/git_init_${NAME}.stamp
+			DEPENDS ${_git_stamp_depends}
+			COMMENT "git submodule ${REL_PATH}"
+			WORKING_DIRECTORY ${PX4_SOURCE_DIR}
+			USES_TERMINAL
+			)
+	endif()
 
 	add_custom_target(${TARGET} DEPENDS git_init_${NAME}.stamp)
 endfunction()

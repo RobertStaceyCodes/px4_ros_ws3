@@ -114,7 +114,7 @@ header += f"""
 """
 
 
-# Mavlink
+# Mavlink (subtree/in-repo: no .git in mavlink path -> use 0 so symbol is always defined)
 if (os.path.exists('src/modules/mavlink/mavlink/.git')):
     mavlink_git_version = subprocess.check_output('git rev-parse --verify HEAD'.split(),
                                       cwd='src/modules/mavlink/mavlink', stderr=subprocess.STDOUT).decode('utf-8').strip()
@@ -123,6 +123,11 @@ if (os.path.exists('src/modules/mavlink/mavlink/.git')):
     header += f"""
 #define MAVLINK_LIB_GIT_VERSION_STR  "{mavlink_git_version}"
 #define MAVLINK_LIB_GIT_VERSION_BINARY 0x{mavlink_git_version_short}
+"""
+else:
+    header += """
+#define MAVLINK_LIB_GIT_VERSION_STR  "unknown"
+#define MAVLINK_LIB_GIT_VERSION_BINARY 0x0
 """
 
 

@@ -35,8 +35,11 @@
 #
 # We depend on our submodules, so we have to prevent attempts to
 # compile without it being present.
+# Set PX4_SKIP_GIT_CHECK=1 when building from a git-subtree/in-repo copy (no .git here).
 ifeq ($(wildcard .git),)
+ifneq ($(PX4_SKIP_GIT_CHECK),1)
     $(error YOU HAVE TO USE GIT TO DOWNLOAD THIS REPOSITORY. ABORTING.)
+endif
 endif
 
 # Help
