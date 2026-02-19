@@ -1,0 +1,20 @@
+{
+    "configurations": [
+        {
+            "name": "PX4",
+            "includePath": [
+                "${workspaceFolder}/**",
+            ],
+            "defines": [],
+            "macFrameworkPath": [],
+            "configurationProvider": "ms-vscode.cmake-tools",
+            "cppStandard": "c++14",
+            "cStandard": "c11",
+            "forcedInclude": [
+                 "/home/rob/px4_ros_ws3/PX4-Autopilot/build/px4_sitl_default/px4_boardconfig.h",
+                 "/home/rob/px4_ros_ws3/PX4-Autopilot/platforms/common/include/px4_platform_common/defines.h"
+                 ]
+        }
+    ],
+    "version": 4
+}
