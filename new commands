@@ -2,38 +2,41 @@
 
 Always use **PX4_SKIP_GIT_CHECK=1** when building PX4 from this repo. The repo has no git tags, so "No names found, cannot describe anything" is normal; the build is set to use v0.0.0 in that case.
 
-## Subtree build (one-time after pulling / if you added the fixes)
-
-PX4 lives in-repo (git subtree). Build requires PX4_SKIP_GIT_CHECK=1. Commit the subtree fixes once:
-
-```bash
-cd ~/px4_ros_ws3
-git add PX4-Autopilot/Makefile PX4-Autopilot/.git PX4-Autopilot/cmake/px4_git.cmake \
-  PX4-Autopilot/src/lib/version/px_update_git_header.py \
-  PX4-Autopilot/src/modules/mavlink/mavlink/pymavlink/generator/C/ \
-  PX4-Autopilot/src/modules/uxrce_dds_client/Micro-XRCE-DDS-Client/src/c/core/log/
-git commit -m "Subtree build: allow PX4 without submodule .git, add missing pymavlink/Micro-XRCE-DDS, fix mavlink version symbol"
-```
 
 ## Running autonomous maze navigation
 
 Use four terminals:
 
 1) PX4 + Gazebo (maze world)
-```bash
+
 (cd ~/px4_ros_ws3/PX4-Autopilot && PX4_SKIP_GIT_CHECK=1 PX4_GZ_WORLD=maze PX4_GZ_MODEL_POSE="0,0,3,0,0,0" make px4_sitl gz_x500_oak_tfluna_d500 HEADLESS=1)
-```
+
 
 mavlink start -u 14550 -t 100.110.83.51 -f
 
 
 2) Sensor bridge + RViz
-```bash
+
+
+#YOU MAY NEED TO BUILD THE BRIDGE AGAIN IF YOU MAKE CHANGES TO THE BRIDGE.
+cd ~/px4_ros_ws3
+source /opt/ros/humble/setup.bash
+source ~/bridge_ws/install/setup.bash
+colcon build --symlink-install
+
+
+#AFTER THAT, RUN this to make the tf_sanitizer script executable:
+
+chmod +x /home/rob/px4_ros_ws3/src/px4_sensor_viz_bringup/scripts/tf_sanitizer.py
+
+
+
+#final step to run the bridge:
 cd /home/rob/px4_ros_ws3
 source /opt/ros/humble/setup.bash
 source install/setup.bash
 ros2 launch px4_sensor_viz_bringup sitl_oak_lidar_viz.launch.py world:=maze
-```
+
 
 cd ~/px4_ros_ws3
 # 1. Source the bridge you just spent 35 minutes building
@@ -56,6 +59,26 @@ source ~/px4_ros_ws3/install/setup.bash
 ros2 run px4_ros_com maze_navigator.py
 ```
 
+
+
+
+
+
+
+
+OPTIONAL:
+
+2) 
+
+cd ~/px4_ros_ws3
+# 1. Source the bridge you just spent 35 minutes building
+source ~/bridge_ws/install/setup.bash
+
+# 2. Source your PX4 workspace again (this overlays it on the bridge)
+source ~/px4_ros_ws3/install/setup.bash
+ros2 launch px4_sensor_viz_bringup sitl_oak_lidar_viz.launch.py world:=maze
+
+4)
 # With bridge overlay:
 ```bash
 source /opt/ros/humble/setup.bash
