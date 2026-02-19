@@ -1,10 +1,23 @@
+## Subtree build (one-time after pulling / if you added the fixes)
+
+PX4 lives in-repo (git subtree). Build requires PX4_SKIP_GIT_CHECK=1. Commit the subtree fixes once:
+
+```bash
+cd ~/px4_ros_ws3
+git add PX4-Autopilot/Makefile PX4-Autopilot/.git PX4-Autopilot/cmake/px4_git.cmake \
+  PX4-Autopilot/src/lib/version/px_update_git_header.py \
+  PX4-Autopilot/src/modules/mavlink/mavlink/pymavlink/generator/C/ \
+  PX4-Autopilot/src/modules/uxrce_dds_client/Micro-XRCE-DDS-Client/src/c/core/log/
+git commit -m "Subtree build: allow PX4 without submodule .git, add missing pymavlink/Micro-XRCE-DDS, fix mavlink version symbol"
+```
+
 ## Running autonomous maze navigation
 
 Use four terminals:
 
 1) PX4 + Gazebo (maze world)
 ```bash
-(cd ~/px4_ros_ws3/PX4-Autopilot && PX4_GZ_WORLD=maze PX4_GZ_MODEL_POSE="0,0,3,0,0,0" make px4_sitl gz_x500_oak_tfluna_d500 HEADLESS=1)
+(cd ~/px4_ros_ws3/PX4-Autopilot && PX4_SKIP_GIT_CHECK=1 PX4_GZ_WORLD=maze PX4_GZ_MODEL_POSE="0,0,3,0,0,0" make px4_sitl gz_x500_oak_tfluna_d500 HEADLESS=1)
 ```
 
 mavlink start -u 14550 -t 100.110.83.51 -f
