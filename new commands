@@ -7,82 +7,253 @@ Always use **PX4_SKIP_GIT_CHECK=1** when building PX4 from this repo. The repo h
 
 Use four terminals:
 
-1) PX4 + Gazebo (maze world)
+### 1) PX4 + Gazebo (maze world)
 
-(cd ~/px4_ros_ws3/PX4-Autopilot && PX4_SKIP_GIT_CHECK=1 PX4_GZ_WORLD=maze PX4_GZ_MODEL_POSE="0,0,3,0,0,0" make px4_sitl gz_x500_oak_tfluna_d500 HEADLESS=1)
+```bash
+cd ~/px4_ros_ws3/PX4-Autopilot
+PX4_SKIP_GIT_CHECK=1 PX4_GZ_WORLD=maze PX4_GZ_MODEL_POSE="0,0,3,0,0,0" make px4_sitl gz_x500_oak_tfluna_d500 
+```
 
-
+**Start MAVLink for QGC connection (Tailscale):**
+```bash
 mavlink start -u 14550 -t 100.110.83.51 -f
 
+SAL:
 
-2) Sensor bridge + RViz
+mavlink start -u 14551 -t 100.118.206.36 -f
+
+encrypted:
+
+mavlink start -m onboard -u 14556 -t 127.0.0.1 -o 14555
+
+then run in separate terminal:
+
+socat TCP4-LISTEN:5760,reuseaddr,fork UDP4:127.0.0.1:14556,bind=127.0.0.1:14555
 
 
-#YOU MAY NEED TO BUILD THE BRIDGE AGAIN IF YOU MAKE CHANGES TO THE BRIDGE.
+# Or use default port 14540:
+# mavlink start -u 14540
+```
+
+
+### 2) Sensor bridge + RViz
+
+**YOU MAY NEED TO BUILD THE BRIDGE AGAIN IF YOU MAKE CHANGES TO THE BRIDGE.**
+
+```bash
 cd ~/px4_ros_ws3
 source /opt/ros/humble/setup.bash
 source ~/bridge_ws/install/setup.bash
 colcon build --symlink-install
+```
 
-
-#AFTER THAT, RUN this to make the tf_sanitizer script executable:
-
+**AFTER THAT, RUN this to make the tf_sanitizer script executable:**
+```bash
 chmod +x ~/px4_ros_ws3/src/px4_sensor_viz_bringup/scripts/tf_sanitizer.py
+```
 
-
-
-#final step to run the bridge:
+**Final step to run the bridge:**
+```bash
 cd ~/px4_ros_ws3
 source /opt/ros/humble/setup.bash
 source install/setup.bash
 ros2 launch px4_sensor_viz_bringup sitl_oak_lidar_viz.launch.py world:=maze
+```
 
-
+**Alternative (with bridge overlay):**
+```bash
 cd ~/px4_ros_ws3
-# 1. Source the bridge you just spent 35 minutes building
+source /opt/ros/humble/setup.bash
 source ~/bridge_ws/install/setup.bash
-
-# 2. Source your PX4 workspace again (this overlays it on the bridge)
 source ~/px4_ros_ws3/install/setup.bash
 ros2 launch px4_sensor_viz_bringup sitl_oak_lidar_viz.launch.py world:=maze
+```
 
 
-3) Micro XRCE-DDS Agent
+### 3) Micro XRCE-DDS Agent
+
 ```bash
 MicroXRCEAgent udp4 -p 8888
 ```
 
-4) Maze Navigator (autonomous)
+
+### 4) Maze Navigator (autonomous)
+
+**Basic setup:**
 ```bash
 source /opt/ros/humble/setup.bash
 source ~/px4_ros_ws3/install/setup.bash
 ros2 run px4_ros_com maze_navigator.py
 ```
 
-
-
-
-
-
-
-
-OPTIONAL:
-
-2) 
-
-cd ~/px4_ros_ws3
-# 1. Source the bridge you just spent 35 minutes building
-source ~/bridge_ws/install/setup.bash
-
-# 2. Source your PX4 workspace again (this overlays it on the bridge)
-source ~/px4_ros_ws3/install/setup.bash
-ros2 launch px4_sensor_viz_bringup sitl_oak_lidar_viz.launch.py world:=maze
-
-4)
-# With bridge overlay:
+**With bridge overlay:**
 ```bash
 source /opt/ros/humble/setup.bash
 source ~/bridge_ws/install/setup.bash
 source ~/px4_ros_ws3/install/setup.bash
 ros2 run px4_ros_com maze_navigator.py
+```
+
+
+### 5) QGC Waypoint Bridge (Optional - for QGC waypoint control)
+
+**Install pymavlink first (one-time setup):**
+```bash
+pip3 install pymavlink
+```
+
+**Start the bridge:**
+```bash
+cd ~/px4_ros_ws3
+source /opt/ros/humble/setup.bash
+source install/setup.bash
+
+# Default port (14540)
+ros2 run px4_ros_com qgc_waypoint_bridge.py
+
+# Custom port (if PX4 MAVLink uses different port)
+ros2 run px4_ros_com qgc_waypoint_bridge.py --mavlink-port udp:14550
+```
+
+**Verify bridge is working:**
+```bash
+# Check if waypoints are being published
+ros2 topic echo /maze_navigator/set_goal
+
+# Check bridge logs for waypoint conversions
+# Should see: "Received waypoint from QGC: seq=X, global=(lat, lon, alt), NED=(x, y, z)"
+```
+
+
+## Sending waypoints manually (without QGC)
+
+### Method 1: Using the helper script
+
+```bash
+cd ~/px4_ros_ws3
+source install/setup.bash
+
+# Send a waypoint (NED coordinates in meters)
+ros2 run px4_ros_com send_waypoint.py <x> <y> [z]
+
+# Examples:
+ros2 run px4_ros_com send_waypoint.py 0.0 24.0      # Default goal
+ros2 run px4_ros_com send_waypoint.py 10.0 15.0     # Custom waypoint
+ros2 run px4_ros_com send_waypoint.py 5.0 20.0 0.0  # With z coordinate
+```
+
+### Method 2: Using ros2 topic pub
+
+```bash
+ros2 topic pub --once /maze_navigator/set_goal geometry_msgs/PointStamped \
+  "{header: {frame_id: 'map'}, point: {x: 0.0, y: 24.0, z: 0.0}}"
+```
+
+
+## Visualizing the map in RViz2
+
+**Start RViz2:**
+```bash
+rviz2
+```
+
+**Add Map display:**
+1. Click "Add" → "By display type" → "Map"
+2. Set topic to: `/maze_navigator/occupancy_grid`
+3. Set fixed frame to: `map`
+
+The occupancy grid shows:
+- **White (0)**: Free space
+- **Black (100)**: Occupied/obstacles  
+- **Gray (-1)**: Unknown space
+
+
+## QGC Setup (MacBook via Tailscale)
+
+**On MacBook:**
+
+1. **Connect QGC to PX4:**
+   - Open QGroundControl
+   - Application Settings → Comm Links
+   - Add UDP connection:
+     - **Name**: Jetson PX4
+     - **Type**: UDP
+     - **Listening Port**: 14540 (or 14550 if using custom port)
+     - **Target Host**: `<jetson_tailscale_ip>` (e.g., 100.110.83.51)
+     - **Target Port**: 14540 (or 14550)
+   - Click **OK** and **Connect**
+
+2. **Create and upload mission:**
+   - Go to **Plan** view
+   - Click **Add Waypoint** on map
+   - Set waypoint coordinates (lat/lon/alt)
+   - Click **Upload** to send mission to vehicle
+   - Waypoints will automatically be forwarded to maze navigator via bridge
+
+
+## Useful debugging commands
+
+**Check MAVLink connection:**
+```bash
+netstat -ulnp | grep 14540
+# or
+netstat -ulnp | grep 14550
+```
+
+**Monitor waypoint topic:**
+```bash
+ros2 topic echo /maze_navigator/set_goal
+```
+
+**Check global position (for coordinate conversion):**
+```bash
+ros2 topic echo /fmu/out/vehicle_global_position
+```
+
+**Check local position:**
+```bash
+ros2 topic echo /fmu/out/vehicle_local_position
+```
+
+**Monitor occupancy grid:**
+```bash
+ros2 topic echo /maze_navigator/occupancy_grid --no-arr
+```
+
+**List all topics:**
+```bash
+ros2 topic list
+```
+
+**Check if nodes are running:**
+```bash
+ros2 node list
+```
+
+
+## Quick rebuild commands
+
+**Rebuild px4_ros_com package:**
+```bash
+cd ~/px4_ros_ws3
+source /opt/ros/humble/setup.bash
+colcon build --packages-select px4_ros_com
+source install/setup.bash
+```
+
+**Rebuild everything:**
+```bash
+cd ~/px4_ros_ws3
+source /opt/ros/humble/setup.bash
+colcon build
+source install/setup.bash
+```
+
+**Clean rebuild:**
+```bash
+cd ~/px4_ros_ws3
+rm -rf build/ install/
+source /opt/ros/humble/setup.bash
+colcon build
+source install/setup.bash
 ```

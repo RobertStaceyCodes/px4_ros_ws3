@@ -111,25 +111,27 @@
          Maze walls — all static boxes, 6 m high
          Arena interior: x in [-1.5 .. 25.5],  y in [-13.5 .. 13.5]
 
-         Layout (top view, North = +Y):
+         Layout (top view, North = +Y, not to scale):
 
-         y=+14  ████████████████████████████████ (wall_outer_n)
-                |        NORTH GAP (9.5 m)      |
-         y=+4   |   ┃wall_1                     |
-                |   ┃  (17.5 m tall, x=8)       |
-         y=-13.5|   ┃                            |
-                |                                |
-         y=-4   |                  wall_2┃       |
-                |                  (x=16)┃       |
-         y=-13.5|                        ┃       |
-                |        SOUTH GAP (9.5 m)       |
-         y=-14  ████████████████████████████████ (wall_outer_s)
-                x=-2   x=8          x=16   x=26
+         y=+13.5 ████████████████████████████████████████ (wall_outer_n)
+                 |  [N gap 6m]  |             |  [N gap 6m]  |
+         y=+7.5  |  ┃ wall_1   |             |  ┃ wall_3    |
+                 |  ┃ (x=6)    |             |  ┃ (x=20)    |
+         y=-13.5 |  ┃          |  [S gap 6m] |  ┃           |
+                 |             |  wall_2 ┃   |              |
+         y=-7.5  |             |  (x=13) ┃   |              |
+                 |             |         ┃   |              |
+         y=-13.5 ████████████████████████████████████████ (wall_outer_s)
+                 x=-2   x=6        x=13        x=20   x=26
 
-         S-curve path:
-           (0,0) → drift north to y≈+9 → pass x=8 (north gap: y=4..13.5)
-                 → drift south to y≈-9 → pass x=16 (south gap: y=-13.5..-4)
-                 → drift north back to y=0 → goal (24,0)
+         All three interior dividers span 21 m (y centre ±10.5 m),
+         leaving a 6 m gap at the open end.
+
+         W-curve path:
+           (0,0) → drift N to y≈+10.5 → pass x=6  (N gap: y=+7.5..+13.5)
+                 → drift S to y≈-10.5 → pass x=13 (S gap: y=-13.5..-7.5)
+                 → drift N to y≈+10.5 → pass x=20 (N gap: y=+7.5..+13.5)
+                 → drift S back to y=0 → goal (24,0)
          ================================================================ -->
 
     <!-- Outer boundary -->
@@ -155,15 +157,14 @@
     </model>
 
     <!-- Interior divider 1 — anchored to south wall, opens north
-         Spans y = -13.5 .. +4  (length 17.5 m)
-         Gap:  y = +4 .. +13.5  (9.5 m opening in the NORTH half)
-         Center y = (-13.5 + 4) / 2 = -4.75 -->
+         Spans y = -13.5 .. +7.5  (length 21 m, centre y = -3.0)
+         Gap:  y = +7.5 .. +13.5  (6 m opening in the NORTH half) -->
     <model name="wall_1">
       <static>true</static>
-      <pose>8 -4.75 3 0 0 0</pose>
+      <pose>6 -3.0 3 0 0 0</pose>
       <link name="link">
-        <collision name="c"><geometry><box><size>1 17.5 6</size></box></geometry></collision>
-        <visual name="v"><geometry><box><size>1 17.5 6</size></box></geometry>
+        <collision name="c"><geometry><box><size>1 21 6</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>1 21 6</size></box></geometry>
           <material>
             <ambient>0.7 0.7 0.7 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -173,15 +174,31 @@
     </model>
 
     <!-- Interior divider 2 — anchored to north wall, opens south
-         Spans y = -4 .. +13.5  (length 17.5 m)
-         Gap:  y = -13.5 .. -4  (9.5 m opening in the SOUTH half)
-         Center y = (-4 + 13.5) / 2 = +4.75 -->
+         Spans y = -7.5 .. +13.5  (length 21 m, centre y = +3.0)
+         Gap:  y = -13.5 .. -7.5  (6 m opening in the SOUTH half) -->
     <model name="wall_2">
       <static>true</static>
-      <pose>16 4.75 3 0 0 0</pose>
+      <pose>13 3.0 3 0 0 0</pose>
       <link name="link">
-        <collision name="c"><geometry><box><size>1 17.5 6</size></box></geometry></collision>
-        <visual name="v"><geometry><box><size>1 17.5 6</size></box></geometry>
+        <collision name="c"><geometry><box><size>1 21 6</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>1 21 6</size></box></geometry>
+          <material>
+            <ambient>0.7 0.7 0.7 1</ambient>
+            <diffuse>0.7 0.7 0.7 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Interior divider 3 — anchored to south wall, opens north
+         Spans y = -13.5 .. +7.5  (length 21 m, centre y = -3.0)
+         Gap:  y = +7.5 .. +13.5  (6 m opening in the NORTH half) -->
+    <model name="wall_3">
+      <static>true</static>
+      <pose>20 -3.0 3 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>1 21 6</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>1 21 6</size></box></geometry>
           <material>
             <ambient>0.7 0.7 0.7 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
