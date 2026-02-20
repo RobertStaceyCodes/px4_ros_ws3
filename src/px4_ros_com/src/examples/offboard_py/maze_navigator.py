@@ -89,11 +89,11 @@ HARD_CEILING_Z: float = -6.0  # [m] NED z hard limit (≈ 6 m above origin)
 TAKEOFF_Z: float = -2.5  # [m] NED z target for takeoff when no rangefinder
 
 # -- Speed limits --
-MAX_SPEED: float = 1.8  # [m/s] open space
-CORRIDOR_SPEED: float = 1.0  # [m/s] near walls
-MIN_SPEED: float = 0.25  # [m/s] minimum forward speed
-SPEED_RAMP_NEAR: float = 1.2  # [m] start slowing below this
-SPEED_RAMP_FAR: float = 3.5  # [m] full speed above this
+MAX_SPEED: float = 3.0  # [m/s] open space
+CORRIDOR_SPEED: float = 2.0  # [m/s] near walls
+MIN_SPEED: float = 0.4  # [m/s] minimum forward speed
+SPEED_RAMP_NEAR: float = 0.8  # [m] start slowing below this
+SPEED_RAMP_FAR: float = 2.5  # [m] full speed above this
 
 # -- Occupancy grid --
 GRID_RES: float = 0.20  # [m/cell]
@@ -110,17 +110,17 @@ L_FREE_THRESH: float = -0.15  # log-odds → "free" for planning
 
 # -- Inflation --
 DRONE_RADIUS: float = 0.35  # [m]
-INFLATE_RADIUS: float = 0.55  # [m] extra clearance
+INFLATE_RADIUS: float = 0.40  # [m] extra clearance (tighter for more direct paths)
 INFLATE_CELLS: int = int(math.ceil((DRONE_RADIUS + INFLATE_RADIUS) / GRID_RES))
 
 # -- A* planner --
 UNKNOWN_COST: float = 2.5  # traversal cost for unknown cells
 BREADCRUMB_PENALTY: float = 0.35  # per-visit penalty
 REPLAN_HZ: float = (
-    2.0  # planning loop rate (Lazy Theta* worst-case ~530 ms on all-unknown grid)
+    3.0  # planning loop rate
 )
-WAYPOINT_CAPTURE: float = 0.7  # [m]
-LOOKAHEAD: float = 2.5  # [m]
+WAYPOINT_CAPTURE: float = 1.0  # [m]
+LOOKAHEAD: float = 4.0  # [m] longer lookahead for smoother high-speed tracking
 
 # -- VFH+ --
 VFH_SECTORS: int = 72  # 5° per sector
@@ -129,9 +129,9 @@ VFH_B: float = 0.02  # range attenuation
 VFH_SMOOTH_LEN: int = 3  # half-width of smoothing kernel
 VFH_THRESH_LO: float = 0.35  # below → free  (applied AFTER per-sector averaging)
 VFH_THRESH_HI: float = 0.65  # above → blocked
-VFH_MU_TARGET: float = 5.0  # cost weight: target direction
-VFH_MU_HEADING: float = 2.0  # cost weight: current heading
-VFH_MU_PREV: float = 2.0  # cost weight: previous selection
+VFH_MU_TARGET: float = 6.0  # cost weight: target direction (stronger pull toward goal)
+VFH_MU_HEADING: float = 1.5  # cost weight: current heading
+VFH_MU_PREV: float = 3.0  # cost weight: previous selection (smoother direction changes)
 
 # -- Depth camera --
 DEPTH_HFOV: float = math.radians(73)  # OAK-D-Lite H-FOV
@@ -145,18 +145,22 @@ LIDAR_MIN_RANGE: float = 0.12
 LIDAR_MAX_RANGE: float = 7.8
 
 # -- Stuck detection --
-STUCK_TIME: float = 7.0  # [s]
-STUCK_DISP: float = 0.45  # [m]
-RECOVER_ROTATE_TIME: float = 5.0  # [s] phase-2 rotation
-RECOVER_BACKUP_TIME: float = 2.5  # [s] phase-3 backup
+STUCK_TIME: float = 6.0  # [s]
+STUCK_DISP: float = 0.40  # [m]
+RECOVER_ROTATE_TIME: float = 3.5  # [s] phase-2 rotation (faster scan)
+RECOVER_BACKUP_TIME: float = 1.5  # [s] phase-3 backup (faster recovery)
 
 # -- Velocity smoother --
-SMOOTH_ALPHA: float = 0.35  # exponential smoothing factor
-MAX_ACCEL: float = 2.5  # [m/s²]
+SMOOTH_ALPHA: float = 0.50  # exponential smoothing factor (higher = more responsive)
+MAX_ACCEL: float = 4.0  # [m/s²] snappier acceleration/deceleration
+
+# -- Yaw control --
+MAX_YAW_RATE: float = 2.5  # [rad/s] maximum yaw rate
+YAW_KP: float = 3.0  # yaw rate proportional gain
 
 # -- Control rates --
-CONTROL_HZ: float = 10.0  # main loop
-OFFBOARD_WARMUP: int = 15  # heartbeats before arming
+CONTROL_HZ: float = 20.0  # main loop (higher = smoother output)
+OFFBOARD_WARMUP: int = 30  # heartbeats before arming (scaled with CONTROL_HZ)
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -1208,12 +1212,14 @@ class MazeNavigator(Node):
 
     @staticmethod
     def _speed_from_clearance(min_dist: float) -> float:
-        if min_dist < 0.4:
+        if min_dist < 0.3:
             return 0.0
         if min_dist < SPEED_RAMP_NEAR:
-            return MIN_SPEED
+            t = (min_dist - 0.3) / (SPEED_RAMP_NEAR - 0.3)
+            return MIN_SPEED * t
         if min_dist < SPEED_RAMP_FAR:
             t = (min_dist - SPEED_RAMP_NEAR) / (SPEED_RAMP_FAR - SPEED_RAMP_NEAR)
+            t = t * t * (3.0 - 2.0 * t)  # smoothstep for jerk-free transition
             return MIN_SPEED + t * (MAX_SPEED - MIN_SPEED)
         return MAX_SPEED
 
@@ -1452,15 +1458,22 @@ class MazeNavigator(Node):
         if goal_dist < 3.0:
             speed = min(speed, CORRIDOR_SPEED * goal_dist / 3.0 + MIN_SPEED)
 
+        # Turn-aware speed: decelerate before sharp heading changes
+        steer_deviation = abs(_ang_diff(steer, self._heading))
+        turn_factor = max(0.35, 1.0 - 0.65 * (steer_deviation / math.pi))
+        speed *= turn_factor
+
         vx_cmd = speed * math.cos(steer)
         vy_cmd = speed * math.sin(steer)
         vz_cmd = self._altitude_vel()
 
         svx, svy, svz = self._smooth(vx_cmd, vy_cmd, vz_cmd)
 
-        # face direction of travel
+        # Yaw-rate control for smooth heading transitions
         desired_yaw = steer if speed > 0.15 else self._heading
-        self._publish_vel(svx, svy, svz, desired_yaw)
+        yaw_error = _ang_diff(desired_yaw, self._heading)
+        yaw_rate = max(-MAX_YAW_RATE, min(MAX_YAW_RATE, YAW_KP * yaw_error))
+        self._publish_vel_yawrate(svx, svy, svz, yaw_rate)
 
         # --- periodic log ---
         if self._tick % 30 == 0:
