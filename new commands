@@ -11,7 +11,7 @@ Use four terminals:
 
 ```bash
 cd ~/px4_ros_ws3/PX4-Autopilot
-PX4_SKIP_GIT_CHECK=1 PX4_GZ_WORLD=maze PX4_GZ_MODEL_POSE="0,0,3,0,0,0" make px4_sitl gz_x500_oak_tfluna_d500 
+PX4_SKIP_GIT_CHECK=1 PX4_GZ_WORLD=maze PX4_GZ_MODEL_POSE="0,0,0,0,0,0" make px4_sitl gz_x500_oak_tfluna_d500 
 ```
 
 **Start MAVLink for QGC connection (Tailscale):**
