@@ -1,0 +1,3 @@
+cd ~/px4_ros_ws3
+source install/setup.bash
+ros2 launch px4_sensor_viz_bringup ldlidar_ld19_demo.launch.py
