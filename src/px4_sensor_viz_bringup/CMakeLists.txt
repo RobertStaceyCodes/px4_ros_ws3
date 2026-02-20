@@ -15,7 +15,7 @@ install(
 )
 
 install(
-  FILES README.md
+  FILES README.md OAK_D_LITE_SETUP.md
   DESTINATION share/${PROJECT_NAME}
 )
 
