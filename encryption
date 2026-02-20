@@ -1,0 +1,5 @@
+socat TCP4-LISTEN:5760,reuseaddr,fork UDP4:127.0.0.1:14556,bind=127.0.0.1:14555
+
+ssh -i /Volumes/px4keys/drone_demo_key -L 5760:127.0.0.1:5760 rob@100.97.46.114
+
+
